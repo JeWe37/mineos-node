@@ -18,7 +18,7 @@ var cookieParser = require('cookie-parser');
 var sessionStore = new expressSession.MemoryStore();
 var app = express();
 var http = require('http').Server(app);
-
+var router = express.Router();
 var response_options = {root: __dirname};
 
 // Authorization
@@ -89,18 +89,18 @@ function ensureAuthenticated(req, res, next) {
 
 var token = require('crypto').randomBytes(48).toString('hex');
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(methodOverride());
-app.use(compression());
-app.use(expressSession({ 
+router.use(bodyParser.urlencoded({extended: false}));
+router.use(methodOverride());
+router.use(compression());
+router.use(expressSession({ 
   secret: token,
   key: 'express.sid',
   store: sessionStore,
   resave: false,
   saveUninitialized: false
 }));
-app.use(passport.initialize());
-app.use(passport.session());
+router.use(passport.initialize());
+router.use(passport.session());
 
 var io = require('socket.io')(http)
 io.use(passportSocketIO.authorize({
@@ -175,25 +175,25 @@ mineos.dependencies(function(err, binaries) {
   tally();
   setInterval(tally, 7200000); //7200000 == 120min
 
-    app.get('/', function(req, res){
-        res.redirect('./admin/index.html');
+    router.get('/', function(req, res){
+        res.redirect('admin/index.html');
     });
 
-    app.get('/admin/index.html', ensureAuthenticated, function(req, res){
+    router.get('/admin/index.html', ensureAuthenticated, function(req, res){
         res.sendfile('/html/index.html', response_options);
     });
 
-    app.get('/login', function(req, res){
+    router.get('/login', function(req, res){
         res.sendfile('/html/login.html');
     });
 
-    app.post('/auth', passport.authenticate('local-signin', {
-        successRedirect: './admin/index.html',
-        failureRedirect: './admin/login.html'
+    router.post('/auth', passport.authenticate('local-signin', {
+        successRedirect: 'admin/index.html',
+        failureRedirect: 'admin/login.html'
         })
     );
 
-  app.all('/api/:server_name/:command', ensureAuthenticated, function(req, res) {
+  router.all('/api/:server_name/:command', ensureAuthenticated, function(req, res) {
     var target_server = req.params.server_name;
     var user = req.user.username;
     var instance = be.servers[target_server];
@@ -209,7 +209,7 @@ mineos.dependencies(function(err, binaries) {
     res.end();
   });
 
-  app.post('/admin/command', ensureAuthenticated, function(req, res) {
+  router.post('/admin/command', ensureAuthenticated, function(req, res) {
     var target_server = req.body.server_name;
     var instance = be.servers[target_server];
     var user = req.user.username;
@@ -222,19 +222,19 @@ mineos.dependencies(function(err, binaries) {
     res.end();
   });
 
-  app.get('/logout', function(req, res){
+  router.get('/logout', function(req, res){
     req.logout();
-    res.redirect('./admin/login.html');
+    res.redirect('admin/login.html');
   });
 
-  app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io'));
-  app.use('/angular', express.static(__dirname + '/node_modules/angular'));
-  app.use('/angular-translate', express.static(__dirname + '/node_modules/angular-translate/dist'));
-  app.use('/moment', express.static(__dirname + '/node_modules/moment'));
-  app.use('/angular-moment', express.static(__dirname + '/node_modules/angular-moment'));
-  app.use('/angular-moment-duration-format', express.static(__dirname + '/node_modules/moment-duration-format/lib'));
-  app.use('/angular-sanitize', express.static(__dirname + '/node_modules/angular-sanitize'));
-  app.use('/admin', express.static(__dirname + '/html'));
+  router.use('/socket.io', express.static(__dirname + '/node_modules/socket.io'));
+  router.use('/angular', express.static(__dirname + '/node_modules/angular'));
+  router.use('/angular-translate', express.static(__dirname + '/node_modules/angular-translate/dist'));
+  router.use('/moment', express.static(__dirname + '/node_modules/moment'));
+  router.use('/angular-moment', express.static(__dirname + '/node_modules/angular-moment'));
+  router.use('/angular-moment-duration-format', express.static(__dirname + '/node_modules/moment-duration-format/lib'));
+  router.use('/angular-sanitize', express.static(__dirname + '/node_modules/angular-sanitize'));
+  router.use('/admin', express.static(__dirname + '/html'));
 
   process.on('SIGINT', function() {
     console.log("Caught interrupt signal; closing webui....");
@@ -245,6 +245,11 @@ mineos.dependencies(function(err, binaries) {
   var SOCKET_PORT = null;
   var SOCKET_HOST = '0.0.0.0';
   var USE_HTTPS = true;
+
+  if ('basepath' in mineos_config)
+    app.use('/' + mineos_config['basepath'], router)
+  else
+    app.use('/', router);
 
   if ('use_https' in mineos_config)
     USE_HTTPS = mineos_config['use_https'];
