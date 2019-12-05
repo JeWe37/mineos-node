@@ -227,14 +227,14 @@ mineos.dependencies(function(err, binaries) {
     res.redirect('./admin/login.html');
   });
 
-  app.use('/socket.io', express.static(__dirname + './node_modules/socket.io'));
-  app.use('/angular', express.static(__dirname + './node_modules/angular'));
-  app.use('/angular-translate', express.static(__dirname + './node_modules/angular-translate/dist'));
-  app.use('/moment', express.static(__dirname + './node_modules/moment'));
-  app.use('/angular-moment', express.static(__dirname + './node_modules/angular-moment'));
-  app.use('/angular-moment-duration-format', express.static(__dirname + './node_modules/moment-duration-format/lib'));
-  app.use('/angular-sanitize', express.static(__dirname + './node_modules/angular-sanitize'));
-  app.use('/admin', express.static(__dirname + './html'));
+  app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io'));
+  app.use('/angular', express.static(__dirname + '/node_modules/angular'));
+  app.use('/angular-translate', express.static(__dirname + '/node_modules/angular-translate/dist'));
+  app.use('/moment', express.static(__dirname + '/node_modules/moment'));
+  app.use('/angular-moment', express.static(__dirname + '/node_modules/angular-moment'));
+  app.use('/angular-moment-duration-format', express.static(__dirname + '/node_modules/moment-duration-format/lib'));
+  app.use('/angular-sanitize', express.static(__dirname + '/node_modules/angular-sanitize'));
+  app.use('/admin', express.static(__dirname + '/html'));
 
   process.on('SIGINT', function() {
     console.log("Caught interrupt signal; closing webui....");
