@@ -84,7 +84,7 @@ function session_cleanup() {
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   req.session.error = 'Please sign in!';
-  res.redirect('/admin/login.html');
+  res.redirect('./admin/login.html');
 }
 
 var token = require('crypto').randomBytes(48).toString('hex');
@@ -175,25 +175,25 @@ mineos.dependencies(function(err, binaries) {
   tally();
   setInterval(tally, 7200000); //7200000 == 120min
 
-    app.get('/', function(req, res){
-        res.redirect('/admin/index.html');
+    app.get('./', function(req, res){
+        res.redirect('./admin/index.html');
     });
 
-    app.get('/admin/index.html', ensureAuthenticated, function(req, res){
-        res.sendfile('/html/index.html', response_options);
+    app.get('./admin/index.html', ensureAuthenticated, function(req, res){
+        res.sendfile('./html/index.html', response_options);
     });
 
-    app.get('/login', function(req, res){
-        res.sendfile('/html/login.html');
+    app.get('./login', function(req, res){
+        res.sendfile('./html/login.html');
     });
 
-    app.post('/auth', passport.authenticate('local-signin', {
-        successRedirect: '/admin/index.html',
-        failureRedirect: '/admin/login.html'
+    app.post('./auth', passport.authenticate('local-signin', {
+        successRedirect: './admin/index.html',
+        failureRedirect: './admin/login.html'
         })
     );
 
-  app.all('/api/:server_name/:command', ensureAuthenticated, function(req, res) {
+  app.all('./api/:server_name/:command', ensureAuthenticated, function(req, res) {
     var target_server = req.params.server_name;
     var user = req.user.username;
     var instance = be.servers[target_server];
@@ -209,7 +209,7 @@ mineos.dependencies(function(err, binaries) {
     res.end();
   });
 
-  app.post('/admin/command', ensureAuthenticated, function(req, res) {
+  app.post('./admin/command', ensureAuthenticated, function(req, res) {
     var target_server = req.body.server_name;
     var instance = be.servers[target_server];
     var user = req.user.username;
@@ -222,19 +222,19 @@ mineos.dependencies(function(err, binaries) {
     res.end();
   });
 
-  app.get('/logout', function(req, res){
+  app.get('./logout', function(req, res){
     req.logout();
-    res.redirect('/admin/login.html');
+    res.redirect('./admin/login.html');
   });
 
-  app.use('/socket.io', express.static(__dirname + '/node_modules/socket.io'));
-  app.use('/angular', express.static(__dirname + '/node_modules/angular'));
-  app.use('/angular-translate', express.static(__dirname + '/node_modules/angular-translate/dist'));
-  app.use('/moment', express.static(__dirname + '/node_modules/moment'));
-  app.use('/angular-moment', express.static(__dirname + '/node_modules/angular-moment'));
-  app.use('/angular-moment-duration-format', express.static(__dirname + '/node_modules/moment-duration-format/lib'));
-  app.use('/angular-sanitize', express.static(__dirname + '/node_modules/angular-sanitize'));
-  app.use('/admin', express.static(__dirname + '/html'));
+  app.use('./socket.io', express.static(__dirname + './node_modules/socket.io'));
+  app.use('./angular', express.static(__dirname + './node_modules/angular'));
+  app.use('./angular-translate', express.static(__dirname + './node_modules/angular-translate/dist'));
+  app.use('./moment', express.static(__dirname + './node_modules/moment'));
+  app.use('./angular-moment', express.static(__dirname + './node_modules/angular-moment'));
+  app.use('./angular-moment-duration-format', express.static(__dirname + './node_modules/moment-duration-format/lib'));
+  app.use('./angular-sanitize', express.static(__dirname + './node_modules/angular-sanitize'));
+  app.use('./admin', express.static(__dirname + './html'));
 
   process.on('SIGINT', function() {
     console.log("Caught interrupt signal; closing webui....");
